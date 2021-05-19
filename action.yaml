@@ -1,0 +1,34 @@
+name: "Generate coverage.info"
+inputs:
+  workdir:
+    description: "Working directory to run lcov from"
+    required: true
+  dir:
+    description: "Directory to run lcov on (relative to workdir or global)"
+    required: true
+  ignore:
+    description: "Ignore files matching this expression"
+    required: true
+    default: ""
+runs:
+  using: "composite"
+  steps:
+    - shell: bash
+      run: >
+        docker run --rm -v ${{ inputs.workdir }}:${{ inputs.workdir }} -w ${{ inputs.workdir }} "$DOCKER_IMAGE" bash -c '
+        set -e
+
+        BLUE="\033[0;34m";
+        NOCOLOR="\033[0m";
+
+        apt-get install -q lcov
+
+        echo -e "${BLUE}Capture coverage info${NOCOLOR}";
+        lcov --capture --directory ${{ inputs.dir }} --output-file coverage.info
+
+        echo -e "${BLUE}Remove files matching: ${{ inputs.ignore }} ${NOCOLOR}";
+        lcov --remove coverage.info ${{ inputs.ignore }} --output-file coverage.info
+
+        echo -e "${BLUE}Output coverage data for debugging${NOCOLOR}";
+        lcov --list coverage.info
+        '
