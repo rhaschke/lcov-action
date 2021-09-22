@@ -22,6 +22,7 @@ runs:
         NOCOLOR="\033[0m";
 
         apt-get -qq update
+
         apt-get install -q lcov
 
         echo -e "${BLUE}Capture coverage info${NOCOLOR}";
