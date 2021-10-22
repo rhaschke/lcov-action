@@ -1,35 +1,20 @@
-name: "Generate coverage.info"
+name: lcov-action
+description: Generate and upload coverage.info
 inputs:
+  docker:
+    description: "docker image to run in (default: none)"
+    required: false
   workdir:
-    description: "Working directory to run lcov from"
-    required: true
-  dir:
-    description: "Directory to run lcov on (relative to workdir or global)"
-    required: true
+    description: "Working directory to run lcov on (default: current dir)"
+    required: false
+  output:
+    description: "Desired output file location (default: workdir/coverage.info)"
+    required: false
   ignore:
-    description: "Ignore files matching this expression"
-    required: true
-    default: ""
+    description: List of glob patterns describing files to ignore
+    required: false
 runs:
-  using: "composite"
+  using: composite
   steps:
     - shell: bash
-      run: >
-        docker run --rm -v ${{ inputs.workdir }}:${{ inputs.workdir }} -w ${{ inputs.workdir }} "$DOCKER_IMAGE" bash -c '
-        set -e
-
-        BLUE="\033[0;34m";
-        NOCOLOR="\033[0m";
-
-        apt-get -qq update;
-        apt-get install -q -y lcov
-
-        echo -e "${BLUE}Capture coverage info${NOCOLOR}";
-        lcov --capture --directory ${{ inputs.dir }} --output-file coverage.info
-
-        echo -e "${BLUE}Remove files matching: ${{ inputs.ignore }} ${NOCOLOR}";
-        lcov --remove coverage.info ${{ inputs.ignore }} --output-file coverage.info
-
-        echo -e "${BLUE}Output coverage data for debugging${NOCOLOR}";
-        lcov --list coverage.info
-        '
+      run: $GITHUB_ACTION_PATH/action.sh "${{ inputs.docker }}" "${{ inputs.workdir }}" "${{ inputs.output }}" ${{ inputs.ignore }}
