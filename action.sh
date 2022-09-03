@@ -16,11 +16,13 @@ function run_docker {
   DIR_THIS=$(dirname "${BASH_SOURCE[0]}")
 
   echo "Using docker image: $DOCKER"
-  docker run --rm -t -v "$DIR_THIS":/lcov -v "$WORKDIR":"$WORKDIR" -w "$WORKDIR" \
+  docker run --rm -t -v "$DIR_THIS":/lcov -v "$BASEDIR":"$BASEDIR" \
+         -v "$WORKDIR":"$WORKDIR" -w "$WORKDIR" \
          -e OUTPUT -e IN_DOCKER=1 "$DOCKER" /lcov/action.sh "$@"
   exit $?
 }
 
+BASEDIR=$(pwd)
 DOCKER=$1
 WORKDIR=$(cd "${2:-$PWD}"; pwd)
 OUTPUT=${3:-"$WORKDIR/coverage.info"}
