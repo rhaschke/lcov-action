@@ -7,6 +7,9 @@ inputs:
   workdir:
     description: "Working directory to run lcov on (default: current dir)"
     required: false
+  lcov_capture_args:
+    description: "Additional arguments to pass to lcov capture"
+    required: false
   output:
     description: "Desired output file location (default: workdir/coverage.info)"
     required: false
@@ -18,3 +21,5 @@ runs:
   steps:
     - shell: bash
       run: $GITHUB_ACTION_PATH/action.sh "${{ inputs.docker }}" "${{ inputs.workdir }}" "${{ inputs.output }}" ${{ inputs.ignore }}
+      env:
+        LCOV_CAPTURE_ARGS: ${{ inputs.lcov_capture_args }}

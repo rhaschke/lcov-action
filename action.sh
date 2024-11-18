@@ -28,6 +28,9 @@ WORKDIR=$(cd "${2:-$PWD}"; pwd)
 OUTPUT=${3:-"$WORKDIR/coverage.info"}
 cd "$WORKDIR"
 
+# turn input string into an array
+eval "LCOV_CAPTURE_ARGS=(${LCOV_CAPTURE_ARGS})"
+
 # Re-run the script in docker
 if [ -n "$DOCKER" ] && [ "${IN_DOCKER:-0}" != "1" ]; then run_docker "$@"; fi
 shift 3
@@ -37,7 +40,7 @@ echo "Writing to: $OUTPUT"
 step "" sudo apt-get -qq update
 step "" sudo apt-get install -q -y lcov
 
-step "Capture coverage info" lcov --quiet --capture --directory "$PWD" --output-file "$OUTPUT"
+step "Capture coverage info" lcov --quiet --capture "${LCOV_CAPTURE_ARGS[@]}" --directory "$PWD" --output-file "$OUTPUT"
 
 step "Extract repository files" lcov --quiet --extract "$OUTPUT" "$PWD/*" --output-file "$OUTPUT"
 
