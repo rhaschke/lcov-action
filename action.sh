@@ -18,7 +18,7 @@ function run_docker {
   echo "Using docker image: $DOCKER"
   docker run --rm -t -v "$DIR_THIS":/lcov -v "$BASEDIR":"$BASEDIR" \
          -v "$WORKDIR":"$WORKDIR" -w "$WORKDIR" \
-         -e OUTPUT -e IN_DOCKER=1 "$DOCKER" /lcov/action.sh "$@"
+         -e OUTPUT -e IN_DOCKER=1 -e LCOV_CAPTURE_ARGS "$DOCKER" /lcov/action.sh "$@"
   exit $?
 }
 
@@ -28,14 +28,16 @@ WORKDIR=$(cd "${2:-$PWD}"; pwd)
 OUTPUT=${3:-"$WORKDIR/coverage.info"}
 cd "$WORKDIR"
 
-# turn input string into an array
-eval "LCOV_CAPTURE_ARGS=(${LCOV_CAPTURE_ARGS})"
 
 # Re-run the script in docker
 if [ -n "$DOCKER" ] && [ "${IN_DOCKER:-0}" != "1" ]; then run_docker "$@"; fi
 shift 3
 echo "Running on dir: $PWD"
 echo "Writing to: $OUTPUT"
+
+# turn input string into an array
+eval "LCOV_CAPTURE_ARGS=(${LCOV_CAPTURE_ARGS})"
+echo "lcov --capture args:" "${LCOV_CAPTURE_ARGS[@]}"
 
 step "" sudo apt-get -qq update
 step "" sudo apt-get install -q -y lcov
